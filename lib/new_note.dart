@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/adapters.dart';
-import 'package:to_do_app_hive/widget/text_form.dart';
+import 'package:to_do_app_hive/widget/routes.dart';
 
 class NewNote extends StatefulWidget {
   const NewNote({super.key});
@@ -10,6 +10,9 @@ class NewNote extends StatefulWidget {
 }
 
 class _NewNoteState extends State<NewNote> {
+
+
+  final _formKey = GlobalKey<FormState>();
   List<Map<String, dynamic>> _items = [];
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _noteController = TextEditingController();
@@ -25,6 +28,7 @@ class _NewNoteState extends State<NewNote> {
       print('check ${_items[0]['note']}');
     });
   }
+
   Future<void> _createNote(Map<String, dynamic> newNote) async {
     await _activities.add(newNote);
 
@@ -32,7 +36,14 @@ class _NewNoteState extends State<NewNote> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, dynamic indexKey) {
+    if (indexKey != null) {
+      final existingItem =
+          _items.firstWhere((element) => element['key'] == indexKey);
+      _titleController.text = existingItem['title'];
+      _noteController.text =existingItem['note'];
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Add New Activity'),
@@ -44,34 +55,48 @@ class _NewNoteState extends State<NewNote> {
               top: 18,
               left: 18,
               right: 18),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              AppTextFormField(controller: _titleController, text: 'Title'),
-              const SizedBox(
-                height: 10,
-              ),
-              AppTextFormField(
-                controller: _noteController,
-                text: 'Note',
-                maxLines: 10,
-              ),
-              const SizedBox(
-                height: 30,
-              ),
-              ElevatedButton(
-                  onPressed: () async {
-                    _createNote({
-                      'title': _titleController.text,
-                      'note': _noteController.text
-                    });
-                    _titleController.text = '';
-                    _noteController.text = '';
-                    Navigator.of(context).pop();
-                  },
-                  child: const Text('Create Note'))
-            ],
+          child: Form(
+            key: _formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                TextFormField(
+                  controller: _titleController,
+                  decoration: InputDecoration(hintText: 'Title', filled: true),
+                ),
+                const SizedBox(
+                  height: 20,
+                ),
+                TextFormField(
+                  maxLines: 9,
+                  controller: _noteController,
+                  decoration: InputDecoration(
+                    hintText: 'Note',
+                    filled: true,
+                  ),
+                ),
+                const SizedBox(
+                  height: 10,
+                ),
+                const SizedBox(
+                  height: 30,
+                ),
+                ElevatedButton(
+                    onPressed: () async {
+                      _createNote({
+                        'title': _titleController.text,
+                        'note': _noteController.text,
+                      });
+                      print(' VALUE OF NOTE${_noteController.text}');
+                      _titleController.text = '';
+                      _noteController.text = '';
+
+                      Navigator.pushNamed(context, homepageRoute);
+                    },
+                    child: const Text('Create Note'))
+              ],
+            ),
           ),
         ),
       ),

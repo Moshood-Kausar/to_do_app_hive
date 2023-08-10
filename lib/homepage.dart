@@ -27,8 +27,13 @@ class _HomePageState extends State<HomePage> {
     setState(() {
       _items = data.reversed.toList();
       print('This is to test ${_items.length}');
-      print('check ${_items[0]['note']}');
+      // print('check ${_items[1]['note']}');
     });
+  }
+
+  Future<void> _deleteNote(int index) async {
+    await _activities.delete(index);
+    _refreshNote();
   }
 
   @override
@@ -49,12 +54,30 @@ class _HomePageState extends State<HomePage> {
             final currentItem = _items[index];
             return Card(
               child: ListTile(
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      onPressed: () {
+                        Navigator.pushNamed(context, newnoteRoute);
+                      },
+                      icon: Icon(Icons.edit),
+                    ),
+                    IconButton(
+                      onPressed: () {
+                        _deleteNote(currentItem['key']);
+                      },
+                      icon: Icon(Icons.delete),
+                    )
+                  ],
+                ),
+                isThreeLine: true,
                 title: Text(
                   currentItem['title'],
-                  style: TextStyle(color: Colors.black),
+                  style: TextStyle(fontWeight: FontWeight.bold),
                 ),
                 subtitle: Text(
-                  currentItem['note'].toString(),
+                  currentItem['note'],
                 ),
               ),
             );
